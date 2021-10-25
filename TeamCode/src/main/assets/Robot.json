@@ -1,0 +1,42 @@
+{
+  "Hardware": {
+    "DcMotors": {
+      "Drive": {
+        "list": ["Front Left Motor", "Front Right Motor", "Back Left Motor", "Back Right Motor"],
+        "Front Left Motor": {
+          "name": "FLM",
+          "Port": "C0",
+          "Reverse": true,
+          "BreakType": "break"
+        },
+        "Front Right Motor": {
+          "name": "FRM",
+          "Port": "C0",
+          "Reverse": true,
+          "BreakType": "break"
+        },
+        "Back Left Motor": {
+          "name": "BLM",
+          "Port": "C0",
+          "Reverse": true,
+          "BreakType": "break"
+        },
+        "Back Right Motor": {
+          "name": "BRM",
+          "Port": "C0",
+          "Reverse": true,
+          "BreakType": "break"
+        }
+      }
+    }
+
+  },
+  "Field": {
+    "location": {
+
+    },
+    "constants": {
+
+    }
+  }
+}
