@@ -4,11 +4,13 @@ import android.app.Application;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,6 +19,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class Hardware extends Application {
 	
@@ -27,15 +30,17 @@ public class Hardware extends Application {
 	private final ElapsedTime Timer = new ElapsedTime();
 	public ElapsedTime time = new ElapsedTime();
 	
-	public DcMotorEx frontLeft;
-	public DcMotorEx frontRight;
-	public DcMotorEx backLeft;
-	public DcMotorEx backRight;
+	public DcMotor frontLeft;
+	public DcMotor frontRight;
+	public DcMotor backLeft;
+	public DcMotor backRight;
 	
 	/** This is all of our drive motors in an array for ease of use */
-	public DcMotorEx[] drive;
+	public DcMotor[] drive;
 	/** This is all of our motors in an array for ease of use */
-	public DcMotorEx[] allMotors;
+	public DcMotor[] allMotors;
+	
+	public AnalogInput potentiometer;
 	
 	Servo[] servo;
 	
@@ -51,7 +56,7 @@ public class Hardware extends Application {
 		this.telemetry = opMode.telemetry;
 		try {
 			// Change "Robot.json" to the file that you are using
-			jsonObject = new JSONObject(loadJSONFromAsset("Robot.json"));
+			jsonObject = new JSONObject(Objects.requireNonNull(loadJSONFromAsset("Robot.json")));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -69,7 +74,7 @@ public class Hardware extends Application {
 		this.telemetry = opMode.telemetry;
 		try {
 			// Change "Robot.json" to the file that you are using
-			jsonObject = new JSONObject(loadJSONFromAsset(JSON));
+			jsonObject = new JSONObject(Objects.requireNonNull(loadJSONFromAsset(JSON)));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -84,34 +89,34 @@ public class Hardware extends Application {
 			
 			// Do not edit this
 			driveMotors = motors.getJSONObject("Drive");
-			frontLeft   = hwMap.get(DcMotorEx.class, String.valueOf(driveMotors.getJSONObject("Front Left Motor").get("name")));
-			frontRight  = hwMap.get(DcMotorEx.class, String.valueOf(driveMotors.getJSONObject("Front Right Motor").get("name")));
-			backLeft    = hwMap.get(DcMotorEx.class, String.valueOf(driveMotors.getJSONObject("Back Left Motor").get("name")));
-			backRight   = hwMap.get(DcMotorEx.class, String.valueOf(driveMotors.getJSONObject("Back Right Motor").get("name")));
-			drive 		= new DcMotorEx[]{frontLeft, frontRight, backLeft, backRight};
+			frontLeft   = hwMap.get(DcMotor.class, String.valueOf(driveMotors.getJSONObject("Front Left Motor").get("name")));
+			frontRight  = hwMap.get(DcMotor.class, String.valueOf(driveMotors.getJSONObject("Front Right Motor").get("name")));
+			backLeft    = hwMap.get(DcMotor.class, String.valueOf(driveMotors.getJSONObject("Back Left Motor").get("name")));
+			backRight   = hwMap.get(DcMotor.class, String.valueOf(driveMotors.getJSONObject("Back Right Motor").get("name")));
+			drive 		= new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
 			
 			if (String.valueOf(driveMotors.getJSONObject("Front Left Motor").get("BreakType")).equals("float")) {
-				frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+				frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			} else {
-				frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+				frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 			}
 			
 			if (String.valueOf(driveMotors.getJSONObject("Front Right Motor").get("BreakType")).equals("float")) {
-				frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+				frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			} else {
-				frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+				frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 			}
 			
 			if (String.valueOf(driveMotors.getJSONObject("Back Left Motor").get("BreakType")).equals("float")) {
-				backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+				backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			} else {
-				backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+				backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 			}
 			
 			if (String.valueOf(driveMotors.getJSONObject("Back Right Motor").get("BreakType")).equals("float")) {
-				backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+				backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 			} else {
-				backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+				backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 			}
 			
 			if ((Boolean) driveMotors.getJSONObject("Front Left Motor").get("Reverse")) 	frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -119,9 +124,13 @@ public class Hardware extends Application {
 			if ((Boolean) driveMotors.getJSONObject("Back Left Motor").get("Reverse")) 		backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 			if ((Boolean) driveMotors.getJSONObject("Back Right Motor").get("Reverse")) 	backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 			
+			potentiometer = hwMap.get(AnalogInput.class, String.valueOf(jsonObject.getJSONObject("Sensors").getJSONObject("potentiometer").get("name")));
+			
 			// Add your own
 			
-			allMotors = new DcMotorEx[]{frontLeft, frontRight, backLeft, backRight};
+			
+			
+			allMotors = new DcMotor[]{frontLeft, frontRight, backLeft, backRight};
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -133,16 +142,16 @@ public class Hardware extends Application {
 	 */
 	public void initAuto(){
 		setDriveMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		for(Servo servo : servo) servo.setPosition(0);
+//		for(Servo servo : servo) servo.setPosition(0);
 		waiter(500);
 	}
 	
 	/**
 	 * Set the motor mode for the drive motors
-	 * @param mode {@link DcMotorEx.RunMode}
+	 * @param mode {@link DcMotor.RunMode}
 	 */
-	public void setDriveMotorMode(DcMotorEx.RunMode mode){
-		for(DcMotorEx dcMotorEx : drive) dcMotorEx.setMode(mode);
+	public void setDriveMotorMode(DcMotor.RunMode mode){
+		for(DcMotor dcMotor : drive) dcMotor.setMode(mode);
 	}
 	
 	/**
@@ -150,6 +159,7 @@ public class Hardware extends Application {
 	 */
 	public void zeroRobot(){
 		// TODO: Make this method
+		// HELP: Check what angles are what voltages
 	}
 	
 	/*=====================================================

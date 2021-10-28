@@ -2,7 +2,12 @@
   "Hardware": {
     "DcMotors": {
       "Drive": {
-        "list": ["Front Left Motor", "Front Right Motor", "Back Left Motor", "Back Right Motor"],
+        "list": [
+          "Front Left Motor",
+          "Front Right Motor",
+          "Back Left Motor",
+          "Back Right Motor"
+        ],
         "Front Left Motor": {
           "name": "FLM",
           "Port": "C0",
@@ -29,6 +34,13 @@
         }
       }
     }
+  },
+  "Sensors": {
+    "potentiometer": {
+      "name": "POE",
+      "Port": "CA0"
+    }
+  }
 
   },
   "Field": {

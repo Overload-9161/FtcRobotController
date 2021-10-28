@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.Hardware;
 import org.firstinspires.ftc.teamcode.util.hardware.LEDController;
 import org.firstinspires.ftc.teamcode.util.hardware.LEDController.state;
 
-@TeleOp(name = "TeleOp_Basic", group = "Test")
+@TeleOp(name = "TeleOp_Basic", group = "TeleOp")
 //@Disabled
 public class TeleOp_Basic extends OpMode {
 	
@@ -49,7 +49,7 @@ public class TeleOp_Basic extends OpMode {
 			if (gamepad1.left_bumper)
 				deflator = 1;
 			
-			//legacy code that runs our mecanum drive wheels in any direction we want
+			//legacy code that runs our mecanum drive wheels
 			
 			//this first section creates the variables that will be used later
 			

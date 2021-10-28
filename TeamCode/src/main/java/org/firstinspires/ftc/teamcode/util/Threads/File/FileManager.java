@@ -18,19 +18,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class FileManager extends Thread {
-	File directory;
-	File file;
+	File directory, file;
+	FileOutputStream fos;
 	
-	public DcMotor[] motor = null;
+	public DcMotor[]   motor   = null;
 	public DcMotorEx[] motorEx = null;
 	
 	OpMode op;
 	
 	List<String> buffer = new ArrayList<>();
 	
-	FileOutputStream fos;
-	
 	Timer timer = new Timer();
+	
+	TimerTask tt;
 	
 	/**
 	 * Init the file manager
@@ -50,9 +50,10 @@ public class FileManager extends Thread {
 			directory = new File(Environment.getExternalStorageDirectory()+Type+"/");
 			if(!directory.exists())
 				directory.mkdirs();
-			directory = new File(Environment.getExternalStorageDirectory()+Type+"/"+Type+Objects.requireNonNull(directory.listFiles()).length);
+			directory = new File(Environment.getExternalStorageDirectory()+Type+"/"+Type);
 			directory.mkdirs();
 			file = new File(directory, "Log.txt");
+			file.mkdir();
 			fos = new FileOutputStream(file);
 			Log.d("File", "Working");
 		} catch (IOException e){
@@ -71,7 +72,7 @@ public class FileManager extends Thread {
 	public void StartTeleOp(ElapsedTime time){
 		this.time = time;
 		Auto_Tele = true;
-		timer.schedule(new calling(time, this), 0, 50);
+		timer.schedule(runTeleLog(), 0, 50);
 		this.start();
 	}
 	
@@ -81,6 +82,8 @@ public class FileManager extends Thread {
 	 */
 	public void StartAuto(ElapsedTime time){
 		this.time = time;
+		timer = new Timer();
+		this.timer.schedule(new AutoLog(this.time, this), 0, 50);
 		this.start();
 	}
 	
@@ -90,10 +93,6 @@ public class FileManager extends Thread {
 	 */
 	public void initMotors(DcMotor[] motors){
 		this.motor = motors;
-	}
-	
-	public void initExMotors(DcMotorEx[] motors){
-		this.motorEx = motors;
 	}
 	
 	@Override
@@ -133,8 +132,8 @@ public class FileManager extends Thread {
 		// Gamepad 1
 		if(op.gamepad1.getGamepadId() > 0) {
 			// Sticks
-			writeFile("Gamepad1-LStick", new float[]{op.gamepad1.left_stick_x, op.gamepad1.left_stick_y}, time);
-			writeFile("Gamepad1-RStick", new float[]{op.gamepad1.right_stick_x, op.gamepad1.right_stick_y}, time);
+			writeFile("Gamepad1-LStick?Plain", new float[]{op.gamepad1.left_stick_x, op.gamepad1.left_stick_y}, time);
+			writeFile("Gamepad1-RStick?Plain", new float[]{op.gamepad1.right_stick_x, op.gamepad1.right_stick_y}, time);
 			// YBAX
 			writeFile("Gamepad1-YBAX", new boolean[]{op.gamepad1.y, op.gamepad1.b, op.gamepad1.a, op.gamepad1.x}, time);
 			// Triggers
@@ -150,8 +149,8 @@ public class FileManager extends Thread {
 		// Gamepad 2
 		if(op.gamepad2.getGamepadId() > 0){
 			// Sticks
-			writeFile("Gamepad2-LStick", new float[]{op.gamepad2.left_stick_x, op.gamepad2.left_stick_y}, time);
-			writeFile("Gamepad2-RStick", new float[]{op.gamepad2.right_stick_x, op.gamepad2.right_stick_y}, time);
+			writeFile("Gamepad2-LStick?Plain", new float[]{op.gamepad2.left_stick_x, op.gamepad2.left_stick_y}, time);
+			writeFile("Gamepad2-RStick?Plain", new float[]{op.gamepad2.right_stick_x, op.gamepad2.right_stick_y}, time);
 			// YBAX
 			writeFile("Gamepad2-YBAX", new boolean[]{op.gamepad2.y, op.gamepad2.b, op.gamepad2.a, op.gamepad2.x}, time);
 			// Triggers
@@ -177,26 +176,13 @@ public class FileManager extends Thread {
 		}
 	}
 	
-	public void writeExMotors(double time){
-		if(motorEx != null){
-			for (DcMotorEx dcMotorEx : motorEx) writeFile(dcMotorEx.getDeviceName(),
-					new double[]{
-							dcMotorEx.getPower(),
-							dcMotorEx.getTargetPosition(),
-							dcMotorEx.getCurrentPosition(),
-							dcMotorEx.getVelocity(),
-						}, time);
-		}
-	}
-	
 	public interface CustomData{
 		void run(double time);
 	}
 	
-	public void runCustom(CustomData dta){
-		custom c = new custom(time, this, dta);
+	public void repeat(CustomData dta){
 		Timer t = new Timer();
-		t.schedule(c, 0, 50);
+		t.schedule(runLambda(dta), 0, 50);
 	}
 	
 	// The max amount of char in a Break line
@@ -247,13 +233,33 @@ public class FileManager extends Thread {
 	public void writeFile(String Name, Object LogThing, double time){
 		buffer.add(Name+"/"+(int)time+":"+LogThing);
 	}
+	
+	private TimerTask runTeleLog(){
+		double time = this.time.milliseconds();
+		writeGamepad(time);
+		writeMotors(time);
+		return null;
+	}
+	
+	private TimerTask runAutoLog(){
+		double time = this.time.milliseconds();
+		writeMotors(time);
+		return null;
+	}
+	
+	private TimerTask runLambda(CustomData CD){
+		double time = this.time.milliseconds();
+		CD.run(time);
+		return null;
+	}
+	
 }
 
-class calling extends TimerTask{
+class AutoLog extends TimerTask {
 	
 	FileManager f;
 	ElapsedTime time;
-	public calling(ElapsedTime time, FileManager f){
+	public AutoLog(ElapsedTime time, FileManager f){
 		this.time = time;
 		this.f = f;
 	}
@@ -262,24 +268,5 @@ class calling extends TimerTask{
 		double t = time.milliseconds();
 		f.writeGamepad(t);
 		f.writeMotors(t);
-		f.writeExMotors(t);
-	}
-}
-
-class custom extends TimerTask{
-	
-	FileManager f;
-	ElapsedTime time;
-	FileManager.CustomData CD;
-	public custom(ElapsedTime time, FileManager f, FileManager.CustomData CD){
-		this.time = time;
-		this.f = f;
-		this.CD = CD;
-	}
-	
-	@Override
-	public void run() {
-		double t = time.milliseconds();
-		CD.run(t);
 	}
 }
