@@ -1,59 +1,53 @@
 package org.firstinspires.ftc.teamcode.util.Threads.File;
 
-import android.os.Environment;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class FileManager extends Thread {
-	File directory, file;
-	FileOutputStream fos;
+public class FileManager {
+	File file;
 	
-	public DcMotor[]   motor   = null;
-	public DcMotorEx[] motorEx = null;
-	
+	DcMotor[] motor = null;
 	OpMode op;
 	
 	List<String> buffer = new ArrayList<>();
 	
-	Timer timer = new Timer();
+	FileOutputStream fos;
 	
-	TimerTask tt;
+	ElapsedTime time;
 	
 	/**
 	 * Init the file manager
-	 * @param Type Weather this is for Autonomous or TeleOp
 	 */
-	public FileManager(String Type, OpMode op){
+	public FileManager(OpMode op){
 		this.op = op;
-		init(Type);
 	}
 	
 	/**
 	 * Init FileManager
 	 * @param Type Weather its TeleOp or Autonomous
 	 */
-	private void init(String Type){
+	public void init(String Type){
 		try {
-			directory = new File(Environment.getExternalStorageDirectory()+Type+"/");
-			if(!directory.exists())
-				directory.mkdirs();
-			directory = new File(Environment.getExternalStorageDirectory()+Type+"/"+Type);
-			directory.mkdirs();
-			file = new File(directory, "Log.txt");
-			file.mkdir();
+			Log.d("File Location", op.hardwareMap.appContext.getCacheDir().toString());
+//			directory = new File("/SD Card"+"/"+Type+"/");
+//			if(!directory.exists())
+//				directory.mkdir s()0;
+//			directory = new File("/SD Card"+"/"+Type+"/");
+//			directory.mkdirs();
+			file = new File(op.hardwareMap.appContext.getCacheDir(), "Logs/"+Type+ Objects.requireNonNull(op.hardwareMap.appContext.getCacheDir().listFiles()).length+".txt");
 			fos = new FileOutputStream(file);
 			Log.d("File", "Working");
 		} catch (IOException e){
@@ -62,18 +56,13 @@ public class FileManager extends Thread {
 		}
 	}
 	
-	ElapsedTime time;
-	boolean Auto_Tele = false; // False for Auto, true for Tele
-	
 	/**
 	 * Start the file writer for teleop. This will log all data from the gamepads along with everything else
 	 * @param time The timer you want to use
 	 */
 	public void StartTeleOp(ElapsedTime time){
 		this.time = time;
-		Auto_Tele = true;
-		timer.schedule(runTeleLog(), 0, 50);
-		this.start();
+		timer.schedule(new calling(time, this), 0, 50);
 	}
 	
 	/**
@@ -82,9 +71,7 @@ public class FileManager extends Thread {
 	 */
 	public void StartAuto(ElapsedTime time){
 		this.time = time;
-		timer = new Timer();
-		this.timer.schedule(new AutoLog(this.time, this), 0, 50);
-		this.start();
+		timer.schedule(new calling(time, this), 0, 50);
 	}
 	
 	/**
@@ -95,18 +82,7 @@ public class FileManager extends Thread {
 		this.motor = motors;
 	}
 	
-	@Override
-	public void run(){
-		this.setPriority(8);
-		while(!this.isInterrupted()){
-			writeToFile();
-			try {
-				sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	Timer timer = new Timer();
 	
 	/**
 	 * Write everything in the buffer to the file, this runs periodically
@@ -132,8 +108,8 @@ public class FileManager extends Thread {
 		// Gamepad 1
 		if(op.gamepad1.getGamepadId() > 0) {
 			// Sticks
-			writeFile("Gamepad1-LStick?Plain", new float[]{op.gamepad1.left_stick_x, op.gamepad1.left_stick_y}, time);
-			writeFile("Gamepad1-RStick?Plain", new float[]{op.gamepad1.right_stick_x, op.gamepad1.right_stick_y}, time);
+			writeFile("Gamepad1-LStick", new float[]{op.gamepad1.left_stick_x, op.gamepad1.left_stick_y}, time);
+			writeFile("Gamepad1-RStick", new float[]{op.gamepad1.right_stick_x, op.gamepad1.right_stick_y}, time);
 			// YBAX
 			writeFile("Gamepad1-YBAX", new boolean[]{op.gamepad1.y, op.gamepad1.b, op.gamepad1.a, op.gamepad1.x}, time);
 			// Triggers
@@ -149,8 +125,8 @@ public class FileManager extends Thread {
 		// Gamepad 2
 		if(op.gamepad2.getGamepadId() > 0){
 			// Sticks
-			writeFile("Gamepad2-LStick?Plain", new float[]{op.gamepad2.left_stick_x, op.gamepad2.left_stick_y}, time);
-			writeFile("Gamepad2-RStick?Plain", new float[]{op.gamepad2.right_stick_x, op.gamepad2.right_stick_y}, time);
+			writeFile("Gamepad2-LStick", new float[]{op.gamepad2.left_stick_x, op.gamepad2.left_stick_y}, time);
+			writeFile("Gamepad2-RStick", new float[]{op.gamepad2.right_stick_x, op.gamepad2.right_stick_y}, time);
 			// YBAX
 			writeFile("Gamepad2-YBAX", new boolean[]{op.gamepad2.y, op.gamepad2.b, op.gamepad2.a, op.gamepad2.x}, time);
 			// Triggers
@@ -176,15 +152,6 @@ public class FileManager extends Thread {
 		}
 	}
 	
-	public interface CustomData{
-		void run(double time);
-	}
-	
-	public void repeat(CustomData dta){
-		Timer t = new Timer();
-		t.schedule(runLambda(dta), 0, 50);
-	}
-	
 	// The max amount of char in a Break line
 	int maxLength = 100;
 	int charLength;
@@ -194,17 +161,17 @@ public class FileManager extends Thread {
 	 * @param name The label of the bar
 	 */
 	public void Break(String name){
-		String thing = "";
+		StringBuilder thing = new StringBuilder();
 		char[] Name = name.toCharArray();
 		charLength = maxLength - Name.length;
 		for(int i = 0; i<charLength; i++){
-			if(i==((int) charLength/2)){
-				thing+=name;
+			if(i==(charLength /2)){
+				thing.append(name);
 			}
-			thing+="=";
+			thing.append("=");
 		}
-		Log.d("Thing", thing);
-		buffer.add(thing);
+		Log.d("Thing", thing.toString());
+		buffer.add(thing.toString());
 	}
 	
 	/**
@@ -218,7 +185,6 @@ public class FileManager extends Thread {
 			timer.cancel();
 			writeToFile();
 			fos.close();
-			this.interrupt();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -226,40 +192,36 @@ public class FileManager extends Thread {
 	
 	/**
 	 * Write to the file buffer
-	 * @param Name The name of the things that you are logging
+	 * @param caption The name of the things that you are logging
 	 * @param LogThing The thing you want to log
 	 * @param time When you logged this thing
 	 */
-	public void writeFile(String Name, Object LogThing, double time){
-		buffer.add(Name+"/"+(int)time+":"+LogThing);
+	public FileManager writeFile(String caption, Object LogThing, double time){
+		buffer.add(caption+"/"+(int)time+":"+LogThing);
+		return this;
 	}
 	
-	private TimerTask runTeleLog(){
-		double time = this.time.milliseconds();
-		writeGamepad(time);
-		writeMotors(time);
-		return null;
+	public FileManager writeFile(String caption, double[] LogThing, double time){
+		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
+		return this;
 	}
 	
-	private TimerTask runAutoLog(){
-		double time = this.time.milliseconds();
-		writeMotors(time);
-		return null;
+	public FileManager writeFile(String caption, float[] LogThing, double time){
+		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
+		return this;
 	}
 	
-	private TimerTask runLambda(CustomData CD){
-		double time = this.time.milliseconds();
-		CD.run(time);
-		return null;
+	public FileManager writeFile(String caption, boolean[] LogThing, double time){
+		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
+		return this;
 	}
-	
 }
 
-class AutoLog extends TimerTask {
+class calling extends TimerTask{
 	
 	FileManager f;
 	ElapsedTime time;
-	public AutoLog(ElapsedTime time, FileManager f){
+	public calling(ElapsedTime time, FileManager f){
 		this.time = time;
 		this.f = f;
 	}
@@ -268,5 +230,6 @@ class AutoLog extends TimerTask {
 		double t = time.milliseconds();
 		f.writeGamepad(t);
 		f.writeMotors(t);
+		f.writeToFile();
 	}
 }

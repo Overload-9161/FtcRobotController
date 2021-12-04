@@ -11,41 +11,68 @@
         "Front Left Motor": {
           "name": "FLM",
           "Port": "C0",
-          "Reverse": true,
-          "BreakType": "break"
+          "Reverse": false,
+          "BrakeType": "brake"
         },
         "Front Right Motor": {
           "name": "FRM",
-          "Port": "C0",
+          "Port": "E0",
           "Reverse": true,
-          "BreakType": "break"
+          "BrakeType": "brake"
         },
         "Back Left Motor": {
           "name": "BLM",
-          "Port": "C0",
-          "Reverse": true,
-          "BreakType": "break"
+          "Port": "C1",
+          "Reverse": false,
+          "BrakeType": "brake"
         },
         "Back Right Motor": {
           "name": "BRM",
-          "Port": "C0",
+          "Port": "E1",
           "Reverse": true,
-          "BreakType": "break"
+          "BrakeType": "brake"
         }
+      },
+      "Lift": {
+        "name": "lift",
+        "Port": "E2",
+        "Reverse": true,
+        "BrakeType": "brake"
+      },
+      "In_Out": {
+        "name": "inout",
+        "port": "C2",
+        "Reverse": false,
+        "BrakeType": "brake"
+      }
+    },
+    "Sensors": {
+      "potentiometer": {
+        "name": "POE",
+        "Port": "CA0"
+      }
+    },
+    "Servos": {
+      "Test": {
+        "name": "test",
+        "Location": "This is located here on the robot"
       }
     }
   },
-  "Sensors": {
-    "potentiometer": {
-      "name": "POE",
-      "Port": "CA0"
-    }
-  }
-
-  },
   "Field": {
     "location": {
-
+      "red": {
+        "hub": {
+          "side 1": [10, 10],
+          "side 2": [20, 10]
+        }
+      },
+      "blue": {
+        "hub": {
+          "side 1": [10, 20],
+          "side 2": [20, 20]
+        }
+      }
     },
     "constants": {
 

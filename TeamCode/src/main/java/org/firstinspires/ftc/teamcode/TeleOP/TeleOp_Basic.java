@@ -5,9 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.util.Threads.File.FileManager;
-import org.firstinspires.ftc.teamcode.util.hardware.Hardware;
-import org.firstinspires.ftc.teamcode.util.hardware.LEDController;
-import org.firstinspires.ftc.teamcode.util.hardware.LEDController.state;
+import org.firstinspires.ftc.teamcode.util.hardware.HardTele;
 
 @TeleOp(name = "TeleOp_Basic", group = "TeleOp")
 //@Disabled
@@ -16,31 +14,32 @@ public class TeleOp_Basic extends OpMode {
 	boolean inReverse   = false;//reverse button is b
 	boolean bWasPressed = false;
 	
-	Hardware r = new Hardware();
-	FileManager fileManager = new FileManager("TeleOp", this);
-	LEDController ledController = new LEDController(this);
+	HardTele r = new HardTele();
+	FileManager fileManager = new FileManager(this);
+	//LEDController ledController = new LEDController(this);
 	
 	ElapsedTime time = new ElapsedTime();
 	
 	@Override
 	public void init() {
-		ledController.setState(state.INIT);
+		//ledController.setState(state.INIT);
 		time.startTime();
 		r.initRobot(this);
-		this.fileManager.StartTeleOp(time);
-		ledController.setState(state.WAIT);
+		fileManager.init("TeleOp");
+		fileManager.initMotors(r.allMotors);
+		fileManager.StartTeleOp(time);
+		//ledController.setState(state.WAIT);
 	}
 	
 	@Override
 	public void start() {
-		ledController.setState(state.RUNNING);
+		//ledController.setState(state.RUNNING);
 		time.startTime();
 		super.start();
 	}
 	
 	@Override
 	public void loop() {
-		//int speed = 0;
 		{
 			double deflator;
 			
@@ -83,7 +82,7 @@ public class TeleOp_Basic extends OpMode {
 				angle = 3 * Math.PI / 2;
 			
 			double velocity = Math.sqrt(Math.pow(gamepad1.left_stick_y, 2) + Math.pow(gamepad1.left_stick_x, 2));
-			double rotation = gamepad1.right_stick_x;
+			double rotation = -gamepad1.right_stick_x;
 			
 			if (inReverse)//reverse button
 				angle += Math.toRadians(180);
@@ -91,19 +90,30 @@ public class TeleOp_Basic extends OpMode {
 			angle += Math.toRadians(270);
 			
 			//equations taking the polar coordinates and turing them into motor powers
-			double power1 = velocity * Math.cos(angle + (Math.PI / 4)) - rotation;
-			double power2 = velocity * Math.sin(angle + (Math.PI / 4)) + rotation;
-			double power3 = velocity * Math.sin(angle + (Math.PI / 4)) - rotation;
-			double power4 = velocity * Math.cos(angle + (Math.PI / 4)) + rotation;
-			fileManager.writeFile("Gamepad1-LStick?Polar", new double[]{angle, velocity, rotation}, time.milliseconds());
-			fileManager.writeFile("Robot-Power", new double[]{power1, power2, power3, power4}, time.milliseconds());
+			double v1 = velocity * Math.cos(angle + (Math.PI / 4));
+			double v2 = velocity * Math.sin(angle + (Math.PI / 4));
+			double power1 = v1 - rotation;
+			double power2 = v2 + rotation;
+			double power3 = v2 - rotation;
+			double power4 = v1 + rotation;
+//			fileManager.writeFile("Gamepad1-LStick?Polar", new double[]{angle, velocity, rotation}, time.milliseconds())
+//					   .writeFile("Robot-Power", new double[]{power1, power2, power3, power4}, time.milliseconds());
 			r.frontLeft.setPower(power1 * deflator);
 			r.frontRight.setPower(power2 * deflator);
 			r.backLeft.setPower(power3 * deflator);
 			r.backRight.setPower(power4 * deflator);
 		}
 		
+		// TODO: Change the decimal at the end to change the speed of the motor
+		// TODO: decrease to make it go slower, increase to go faster
+		r.lift.setPower(-gamepad1.right_stick_y * 0.7);
 		
+		// TODO: Change the "0.6" to change the speed
+		if(gamepad1.dpad_up)
+			r.inout.setPower(-0.6);
+		else if(gamepad1.dpad_down)
+			r.inout.setPower(0.6);
+		else r.inout.setPower(0);
 		
 	}
 	

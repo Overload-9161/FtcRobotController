@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.util.Threads.File.FileManager;
-import org.firstinspires.ftc.teamcode.util.hardware.Hardware;
+import org.firstinspires.ftc.teamcode.util.hardware.util.Hardware;
 import org.firstinspires.ftc.teamcode.util.hardware.LEDController;
 import org.firstinspires.ftc.teamcode.util.hardware.LEDController.state;
 
@@ -37,7 +37,7 @@ public class DEV_DontUse extends OpMode {
 	boolean bWasPressed = false;
 	
 	Hardware 	  r 			= new Hardware();
-	FileManager   fileManager 	= new FileManager("TeleOp", this);
+	FileManager   fileManager 	= new FileManager(this);
 	LEDController ledController = new LEDController(this);
 	
 	ElapsedTime time;
