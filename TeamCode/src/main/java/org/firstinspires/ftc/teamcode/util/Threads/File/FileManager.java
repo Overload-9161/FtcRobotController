@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.util.Threads.File;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.io.File;
@@ -16,6 +18,9 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import fileManager.Executable;
+
+@SuppressWarnings(value = "unused")
 public class FileManager {
 	File file;
 	
@@ -27,6 +32,8 @@ public class FileManager {
 	FileOutputStream fos;
 	
 	ElapsedTime time;
+	
+	List<LynxModule> allHubs;
 	
 	/**
 	 * Init the file manager
@@ -47,13 +54,22 @@ public class FileManager {
 //				directory.mkdir s()0;
 //			directory = new File("/SD Card"+"/"+Type+"/");
 //			directory.mkdirs();
-			file = new File(op.hardwareMap.appContext.getCacheDir(), "Logs/"+Type+ Objects.requireNonNull(op.hardwareMap.appContext.getCacheDir().listFiles()).length+".txt");
+			file = new File(op.hardwareMap.appContext.getCacheDir(), "/Logs/"+Type+ Objects.requireNonNull(op.hardwareMap.appContext.getCacheDir().listFiles()).length+".txt");
+			if(!file.exists())
+				file.mkdirs();
 			fos = new FileOutputStream(file);
 			Log.d("File", "Working");
 		} catch (IOException e){
-			e.printStackTrace();
 			Log.wtf("File", "Failed");
+			e.printStackTrace();
 		}
+		
+		allHubs = op.hardwareMap.getAll(LynxModule.class);
+		
+		for (LynxModule module : allHubs) {
+			module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+		}
+		
 	}
 	
 	/**
@@ -138,6 +154,11 @@ public class FileManager {
 			// Random
 			writeFile("Gamepad2-R", new boolean[]{op.gamepad2.start, op.gamepad2.back, op.gamepad2.left_stick_button, op.gamepad2.right_stick_button}, time);
 		}
+		for(VoltageSensor sensor : op.hardwareMap.voltageSensor){
+			double voltage = sensor.getVoltage();
+			if(voltage > 0)
+				writeFile("Voltage", voltage, time);
+		}
 	}
 	
 	/**
@@ -196,25 +217,46 @@ public class FileManager {
 	 * @param LogThing The thing you want to log
 	 * @param time When you logged this thing
 	 */
+//	public FileManager writeFile(String caption, Object LogThing, double time){
+//		buffer.add(caption+"/"+(int)time+":"+LogThing);
+//		return this;
+//	}
+//
+//	public FileManager writeFile(String caption, double[] LogThing, double time){
+//		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
+//		return this;
+//	}
+//
+//	public FileManager writeFile(String caption, float[] LogThing, double time){
+//		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
+//		return this;
+//	}
+//
+//	public FileManager writeFile(String caption, boolean[] LogThing, double time){
+//		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
+//		return this;
+//	}
+	
 	public FileManager writeFile(String caption, Object LogThing, double time){
-		buffer.add(caption+"/"+(int)time+":"+LogThing);
+		buffer.add(caption+"/"+(int)time+":"+ LogThing);
 		return this;
 	}
 	
-	public FileManager writeFile(String caption, double[] LogThing, double time){
-		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
-		return this;
+	Executable sample = null;
+	
+	/**
+	 * Set the code that you want to run
+	 * @param code {@link Executable}
+	 */
+	public void setExecutable(Executable code){
+		sample = code;
 	}
 	
-	public FileManager writeFile(String caption, float[] LogThing, double time){
-		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
-		return this;
+	void customRun(double time){
+		if(sample != null)
+			sample.run(time);
 	}
 	
-	public FileManager writeFile(String caption, boolean[] LogThing, double time){
-		buffer.add(caption+"/"+(int)time+":"+ Arrays.toString(LogThing));
-		return this;
-	}
 }
 
 class calling extends TimerTask{
@@ -230,6 +272,7 @@ class calling extends TimerTask{
 		double t = time.milliseconds();
 		f.writeGamepad(t);
 		f.writeMotors(t);
+		f.customRun(t);
 		f.writeToFile();
 	}
 }

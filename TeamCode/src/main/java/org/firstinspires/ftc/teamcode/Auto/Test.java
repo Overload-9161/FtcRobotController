@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
+/*
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -35,3 +36,5 @@ public class Test extends LinearOpMode {
 		
 	}
 }
+
+*/

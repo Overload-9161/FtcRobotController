@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings(value = "unused")
 public class Camera {
 	
 	OpMode opMode;

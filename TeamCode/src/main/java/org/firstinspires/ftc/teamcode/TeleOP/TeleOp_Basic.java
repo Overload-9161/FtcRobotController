@@ -103,12 +103,9 @@ public class TeleOp_Basic extends OpMode {
 			r.backLeft.setPower(power3 * deflator);
 			r.backRight.setPower(power4 * deflator);
 		}
-		
-		// TODO: Change the decimal at the end to change the speed of the motor
-		// TODO: decrease to make it go slower, increase to go faster
+
 		r.lift.setPower(-gamepad1.right_stick_y * 0.7);
-		
-		// TODO: Change the "0.6" to change the speed
+
 		if(gamepad1.dpad_up)
 			r.inout.setPower(-0.6);
 		else if(gamepad1.dpad_down)

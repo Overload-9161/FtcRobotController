@@ -10,38 +10,38 @@
         ],
         "Front Left Motor": {
           "name": "FLM",
-          "Port": "C0",
+          "Port": "C-0",
           "Reverse": false,
           "BrakeType": "brake"
         },
         "Front Right Motor": {
           "name": "FRM",
-          "Port": "E0",
+          "Port": "E-0",
           "Reverse": true,
           "BrakeType": "brake"
         },
         "Back Left Motor": {
           "name": "BLM",
-          "Port": "C1",
+          "Port": "C-1",
           "Reverse": false,
           "BrakeType": "brake"
         },
         "Back Right Motor": {
           "name": "BRM",
-          "Port": "E1",
+          "Port": "E-1",
           "Reverse": true,
           "BrakeType": "brake"
         }
       },
       "Lift": {
         "name": "lift",
-        "Port": "E2",
+        "Port": "E-2",
         "Reverse": true,
         "BrakeType": "brake"
       },
       "In_Out": {
         "name": "inout",
-        "port": "C2",
+        "port": "C-2",
         "Reverse": false,
         "BrakeType": "brake"
       }
@@ -49,12 +49,13 @@
     "Sensors": {
       "potentiometer": {
         "name": "POE",
-        "Port": "CA0"
+        "Port": "C-A0"
       }
     },
     "Servos": {
       "Test": {
         "name": "test",
+        "port": "",
         "Location": "This is located here on the robot"
       }
     }
@@ -62,16 +63,28 @@
   "Field": {
     "location": {
       "red": {
+        "StartingLoc": {
+          "First": [],
+          "Second": []
+        },
         "hub": {
-          "side 1": [10, 10],
-          "side 2": [20, 10]
-        }
+          "side 1": [],
+          "side 2": []
+        },
+        "Warehouse": [],
+        "Depot": []
       },
       "blue": {
+        "StartingLoc": {
+          "First": [],
+          "Second": []
+        },
         "hub": {
-          "side 1": [10, 20],
-          "side 2": [20, 20]
-        }
+          "side 1": [],
+          "side 2": []
+        },
+        "Warehouse": [],
+        "Depot": []
       }
     },
     "constants": {

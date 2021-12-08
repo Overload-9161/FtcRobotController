@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.util.hardware;
 
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -227,7 +228,6 @@ public class HardAuto extends Hardware{
 	/*==============================================
 	 * This is development past this point
 	 *==============================================*/
-	
 	/**
 	 * This method is to
 	 * @param distance The distance you want to move

@@ -17,6 +17,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.util.IMUUtil.Accel;
 import org.firstinspires.ftc.teamcode.util.Threads.File.FileManager;
 
+import fileManager.Executable;
+
 @SuppressWarnings(value = "unused")
 public class IMUPos extends Thread {
 	
@@ -101,36 +103,46 @@ public class IMUPos extends Thread {
 	@Override
 	public void run() {
 		
-		opMode.telemetry.addAction(() -> {
+//		opMode.telemetry.addAction(() -> {
+//			angles  = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//			gravity = imu.getGravity();
+//		});
+//		opMode.telemetry.addLine("Position thingy")
+//				.addData("X", () -> String.valueOf(position.x))
+//				.addData("Y", () -> String.valueOf(position.y));
+//		// Position Data
+//		opMode.telemetry.addLine()
+//				.addData("Pos X", () -> String.valueOf(imu.getPosition().x))
+//				.addData("Pos Y", () -> String.valueOf(imu.getPosition().y))
+//				.addData("Pos Z", () -> String.valueOf(imu.getPosition().z));
+//		// General Acceleration
+//		opMode.telemetry.addLine()
+//				.addData("GA X","%2.2f", () -> imu.getAcceleration().xAccel)
+//				.addData("GA Y","%2.2f", () -> imu.getAcceleration().yAccel)
+//				.addData("GA Z","%2.2f", () -> imu.getAcceleration().zAccel);
+//		// Linear Acceleration
+//		opMode.telemetry.addLine()
+//				.addData("Lin X","%2.2f", () -> imu.getLinearAcceleration().xAccel)
+//				.addData("Lin Y","%2.2f", () -> imu.getLinearAcceleration().yAccel)
+//				.addData("Lin Z","%2.2f", () -> imu.getLinearAcceleration().zAccel);
+//		// Angles
+//		opMode.telemetry.addLine()
+//				.addData("First","%2.2f",  () -> angles.firstAngle)
+//				.addData("Second","%2.2f", () -> angles.secondAngle)
+//				.addData("Third","%2.2f",  () -> angles.thirdAngle);
+		
+		Executable ex = (time) -> {
 			angles  = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-			gravity = imu.getGravity();
-		});
-		opMode.telemetry.addLine("Position thingy")
-				.addData("X", () -> String.valueOf(position.x))
-				.addData("Y", () -> String.valueOf(position.y));
-		// Position Data
-		opMode.telemetry.addLine()
-				.addData("Pos X", () -> String.valueOf(imu.getPosition().x))
-				.addData("Pos Y", () -> String.valueOf(imu.getPosition().y))
-				.addData("Pos Z", () -> String.valueOf(imu.getPosition().z));
-		// General Acceleration
-		opMode.telemetry.addLine()
-				.addData("GA X","%2.2f", () -> imu.getAcceleration().xAccel)
-				.addData("GA Y","%2.2f", () -> imu.getAcceleration().yAccel)
-				.addData("GA Z","%2.2f", () -> imu.getAcceleration().zAccel);
-		// Linear Acceleration
-		opMode.telemetry.addLine()
-				.addData("Lin X","%2.2f", () -> imu.getLinearAcceleration().xAccel)
-				.addData("Lin Y","%2.2f", () -> imu.getLinearAcceleration().yAccel)
-				.addData("Lin Z","%2.2f", () -> imu.getLinearAcceleration().zAccel);
-		// Angles
-		opMode.telemetry.addLine()
-				.addData("First","%2.2f",  () -> angles.firstAngle)
-				.addData("Second","%2.2f", () -> angles.secondAngle)
-				.addData("Third","%2.2f",  () -> angles.thirdAngle);
+//			gravity = imu.getGravity();
+			fileManager.writeFile("GA", 	new double[]{imu.getAcceleration().xAccel, imu.getAcceleration().yAccel, imu.getAcceleration().zAccel}, time)
+					   .writeFile("Lin",	new double[]{imu.getLinearAcceleration().xAccel, imu.getLinearAcceleration().yAccel, imu.getLinearAcceleration().zAccel}, time)
+					   .writeFile("Angle", 	new double[]{angles.firstAngle, angles.secondAngle, angles.thirdAngle}, time);
+		};
+		
 		while(!this.isInterrupted()){
 			// TODO: Read the IMU data and use a PID loop to get location
-			opMode.telemetry.update();
+			//opMode.telemetry.update();
+			// HELP: Don't do anything
 		}
 	}
 	
